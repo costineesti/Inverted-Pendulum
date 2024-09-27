@@ -51,3 +51,13 @@ Bc = [0; K/R/J];
 % => Mut ambii poli in -1.
 p = [-1, -1];
 K_Gain = acker(Ac,Bc,p);
+A_state_feedback = Ac-Bc*K_Gain;
+disp(eig(A_state_feedback)); % ambii poli in -1.
+
+%% Part 3: State Observer
+
+Cd = [1, 0]; % only the position.
+observer_poles = [0.1, 0.2]; % inside the unit circle.
+L = place(Ad', Cd', observer_poles)';
+A_observer = Ad-L*Cd;
+disp(eig(A_observer)); % Se poate observa ca sunt in cercul unitate.
