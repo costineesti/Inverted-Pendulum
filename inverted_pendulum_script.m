@@ -46,6 +46,7 @@ plot(x_traj(2,:)); grid; title('Viteza unghiulara');
 %% Part 2: State - Feedback Control
 Ac = [0 1;m*g*l/J (-b+K^2/R)/J];
 Bc = [0; K/R/J];
+Cc = eye(2);
 
 % eig(Ac) = > s1 = -10.1368; s2 = 11.7044
 % => Mut ambii poli in -1.
@@ -61,3 +62,25 @@ observer_poles = [0.1, 0.2]; % inside the unit circle.
 L = place(Ad', Cd', observer_poles)';
 A_observer = Ad-L*Cd;
 disp(eig(A_observer)); % Se poate observa ca sunt in cercul unitate.
+
+%% Definire parametri initiali si C.I.
+x0_state_feedback = [0.1;0];
+x0_obs = [0.1;0];
+timp = 0:Ts:10;
+vector_nul = zeros(size(timp));
+
+% Simulez raspunsul pentru fiecare
+sys_state_feedback = ss(A_state_feedback, Bc, Cc, 0);
+[y_state_feedback, t, x_state_feedback] = lsim(sys_state_feedback, vector_nul, timp, x0_state_feedback);
+
+intrare_observer = K_Gain * y_state_feedback' ;
+
+sys_observer = ss(A_observer, Bd, Cd, 0, Ts);
+[y_obs, t_obs, y_obs] = lsim(sys_observer, intrare_observer, timp, x0_obs);
+
+figure;
+subplot(2,1,1);
+plot(t, y_state_feedback, 'LineWidth', 3); title('Raspunsul sistemului cu reactie de la stare'); xlabel('timp [s]'); ylabel('iesire'); legend('alpha','alphadot'); grid;
+
+subplot(2,1,2);
+plot(t_obs, y_obs, 'LineWidth', 2); title('Raspunsul observatorului'); xlabel('timp [s]'); ylabel('iesire'); legend('alpha','alphadot'); grid;
